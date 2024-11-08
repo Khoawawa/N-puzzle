@@ -7,9 +7,10 @@ class DFS:
     def solve(self):
         root = self.board
         if not root.solvable():
-            return False
+            return ("The given puzzle is unsolvable"), 0
         if root.already_solved():
-            return True
+            return root.solution(),0
+        
         queue = LifoQueue()
         queue.put(root)
         explored = []
@@ -24,9 +25,11 @@ class DFS:
             for c in child_states:
                 if c.board not in explored:
                     if not c.solvable():
+                        explored.append(c.board) # add unsolvable state to explored list
                         continue
                     if c.already_solved():
-                        return True
+                        return c.solution(), len(explored)
                     queue.put(c)
-        return False
+                    
+        return (("Unsolvable with the given depth"), len(explored))
             

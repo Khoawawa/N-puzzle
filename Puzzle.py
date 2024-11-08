@@ -2,11 +2,13 @@ import numpy as np
 from copy import copy
 # board should be sqrt(N+1)
 class Puzzle:
-    def __init__(self, board, k, depth=0):
+    def __init__(self, board, k, direction=None,depth=0,parent=None):
         self.board = board
         self.goal = self.generateGoal(k)
         self.k = k
         self.depth = depth
+        self.parent = parent
+        self.direction = direction
         
     def already_solved(self):
         if self.board == self.goal:
@@ -78,9 +80,24 @@ class Puzzle:
                 temp_board[x[0]][x[1]], temp_board[x[0]][x[1] + 1] = temp_board[x[0]][x[1] + 1], temp_board[x[0]][x[1]]
             elif direction == 'L':
                 temp_board[x[0]][x[1]], temp_board[x[0]][x[1] - 1] = temp_board[x[0]][x[1] - 1], temp_board[x[0]][x[1]]
-            children.append(Puzzle(temp_board,self.k,self.depth + 1))
+            
+            children.append(Puzzle(temp_board,self.k,direction,self.depth + 1,self))
+        
         return children
+    
+    def solution(self):
+        sol =[]
+        sol.append(self.direction)
+        path = self
         
+        while(path.parent):
+            path = path.parent  
+            sol.append(path.direction)
         
+        sol = sol[:-1] # remove the none direction at init puzzle
+        
+        sol.reverse()
+        
+        return sol
 if __name__ == "__main__":
     puzzle = Puzzle()
