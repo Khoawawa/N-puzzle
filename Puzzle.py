@@ -16,9 +16,13 @@ class Puzzle:
         return False
     
     def inv_num(self):
-        flat_board = [num for row in self.board for num in row]
-        
-        inv = sum(1 for i in range(len(flat_board) - 1) for j in range(i+1,len(flat_board)) if flat_board[i] > flat_board[j] and flat_board[i] and flat_board[j]) 
+        flat_board = [num for row in self.board for num in row if num != 0]
+        inv = 0
+        for i in range(len(flat_board)-1):
+            for j in range(i+1 , len(flat_board)):
+                if ((flat_board[i] > flat_board[j]) and flat_board[i] and flat_board[j]):
+                    inv += 1   
+        # inv = sum(1 for i in range(len(flat_board) - 1) for j in range(i+1,len(flat_board)) if flat_board[i] > flat_board[j] and flat_board[i] and flat_board[j]) 
         
         return inv
     
@@ -100,4 +104,4 @@ class Puzzle:
         
         return sol
 if __name__ == "__main__":
-    puzzle = Puzzle()
+    flat_board = Puzzle()

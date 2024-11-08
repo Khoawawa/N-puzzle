@@ -19,7 +19,7 @@ class DFS:
             curr_state = queue.get()
             explored.append(curr_state.board)
             
-            if curr_state.depth == 30: 
+            if curr_state.depth == 31: 
                 continue
             child_states = curr_state.move()
             for c in child_states:
