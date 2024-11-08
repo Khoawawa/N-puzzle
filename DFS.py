@@ -9,7 +9,7 @@ class DFS:
         if not root.solvable():
             return ("The given puzzle is unsolvable"), 0
         if root.already_solved():
-            return root.solution(),0
+            return ("The given puzzle is already solved"),0
         
         queue = LifoQueue()
         queue.put(root)

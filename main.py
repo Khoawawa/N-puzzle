@@ -4,7 +4,7 @@ def main():
     k = 3
     initial_board = [[1, 2, 3],
                      [4, 5, 6],
-                     [7, 0, 8]]
+                     [7, 8, 0]]
     init_puzzle = Puzzle(initial_board,k)
     solver = DFS(init_puzzle)
     DFS_sol, explored_len = solver.solve()
