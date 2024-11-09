@@ -1,35 +1,36 @@
 from Puzzle import Puzzle
 from queue import LifoQueue
 class DFS:
-    def __init__(self,initial_state):
+    def __init__(self,initial_state: Puzzle):
         self.board = initial_state
         
     def solve(self):
         root = self.board
-        if not root.solvable():
-            return ("The given puzzle is unsolvable"), 0
-        if root.already_solved():
-            return ("The given puzzle is already solved"),0
+
+        stack = LifoQueue()
+        stack.put(root)
         
-        queue = LifoQueue()
-        queue.put(root)
-        explored = []
+        explored = set()
         
-        while not(queue.empty()):
-            curr_state = queue.get()
-            explored.append(curr_state.board)
+        while not(stack.empty()):
+            curr_state = stack.get()
             
-            if curr_state.depth == 31: 
+            explored.add(curr_state)
+            
+            if curr_state.already_solved():
+                return curr_state.solution(), len(explored)
+            
+            if not curr_state.solvable():
                 continue
+            
+            # if curr_state.depth == 31: 
+            #     continue
+            
             child_states = curr_state.move()
+            
             for c in child_states:
-                if c.board not in explored:
-                    if not c.solvable():
-                        explored.append(c.board) # add unsolvable state to explored list
-                        continue
-                    if c.already_solved():
-                        return c.solution(), len(explored)
-                    queue.put(c)
+                if c not in explored:
+                    stack.put(c)
                     
-        return (("Unsolvable with the given depth"), len(explored))
+        return (("The initial board is unsolvable"), len(explored))
             

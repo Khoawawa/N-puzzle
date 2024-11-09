@@ -1,19 +1,29 @@
 import numpy as np
 from copy import copy
+import random
 # board should be sqrt(N+1)
 class Puzzle:
     def __init__(self, board, k, direction=None,depth=0,parent=None):
-        self.board = board
-        self.goal = self.generateGoal(k)
         self.k = k
+        if board:
+            self.board = board
+        else:
+            self.generateRandomBoard(k)
+        self.goal = self.generateGoal(k)
         self.depth = depth
         self.parent = parent
         self.direction = direction
-        
+    
+    def generateRandomBoard(self,k):
+        while True:
+            board_1d = list(range(1, k*k)) + [0]
+            random.shuffle(board_1d)
+            self.board = [board_1d[i * k : (i+1) * k] for i in range(k)]
+            if self.solvable():
+                break
+            
     def already_solved(self):
-        if self.board == self.goal:
-            return True  
-        return False
+        return self.board == self.goal
     
     def inv_num(self):
         flat_board = [num for row in self.board for num in row if num != 0]
@@ -52,56 +62,76 @@ class Puzzle:
         goal_state[-1][-1] = 0
         
         return goal_state
+    
     def find_blank_cell(self):
         for row in range(self.k):
             if 0 in self.board[row]:
                 col = self.board[row].index(0)
-                return (row,col)
+                return row,col
         return None
-    def legal_moves(self,x):
+    
+    def legal_moves(self,row,col):
         moves = ['L','R','U','D']
-        if x[1] == 0:
+        if col == 0:
             moves.remove('L')
-        if x[1] == self.k - 1:
+        if col == self.k - 1:
             moves.remove('R')
-        if x[0] == 0:
+        if row == 0:
             moves.remove('U')
-        if x[0] == self.k - 1:
+        if row == self.k - 1:
             moves.remove('D')
+            
         return moves
+    
+    def _swap_cell(self, r1, c1, r2, c2):
+        new_board = [row[:] for row in self.board]
+        new_board[r1][c1], new_board[r2][c2] = new_board[r2][c2], new_board[r1][c1]
+        
+        return new_board
+    
     def move(self):
-        x = self.find_blank_cell()
-        moves = self.legal_moves(x)
+        x_row,x_col = self.find_blank_cell()
+        moves = self.legal_moves(x_row,x_col)
         
         children = []
+        new_board = None
+        
         for direction in moves:
-            temp_board = [row[:] for row in self.board]
             if direction == 'U':
-                temp_board[x[0]][x[1]], temp_board[x[0] - 1][x[1]] = temp_board[x[0] - 1][x[1]], temp_board[x[0]][x[1]]
+                new_row = x_row - 1
+                new_board = self._swap_cell(x_row,x_col,new_row,x_col)
             elif direction == 'D':
-                temp_board[x[0]][x[1]], temp_board[x[0] + 1][x[1]] = temp_board[x[0] + 1][x[1]], temp_board[x[0]][x[1]]
+                new_row = x_row + 1
+                new_board = self._swap_cell(x_row,x_col,new_row,x_col)
             elif direction == 'R':
-                temp_board[x[0]][x[1]], temp_board[x[0]][x[1] + 1] = temp_board[x[0]][x[1] + 1], temp_board[x[0]][x[1]]
+                new_col = x_col + 1
+                new_board = self._swap_cell(x_row,x_col,x_row,new_col)
             elif direction == 'L':
-                temp_board[x[0]][x[1]], temp_board[x[0]][x[1] - 1] = temp_board[x[0]][x[1] - 1], temp_board[x[0]][x[1]]
+                new_col = x_col - 1
+                new_board = self._swap_cell(x_row,x_col,x_row,new_col)
             
-            children.append(Puzzle(temp_board,self.k,direction,self.depth + 1,self))
+            children.append(Puzzle(new_board,self.k,direction,self.depth + 1,self))
         
         return children
     
     def solution(self):
         sol =[]
-        sol.append(self.direction)
+        sol.append(self)
         path = self
         
         while(path.parent):
             path = path.parent  
-            sol.append(path.direction)
-        
-        sol = sol[:-1] # remove the none direction at init puzzle
+            sol.append(path)
         
         sol.reverse()
         
         return sol
-if __name__ == "__main__":
-    flat_board = Puzzle()
+    
+    def __eq__(self, other):
+        return self.board == other.board
+    
+    def __str__(self):
+        return '\n'.join([' '.join(map(str,row)) for row in self.board])
+    
+    def __hash__(self):
+        return hash(tuple(tuple(row) for row in self.board))
