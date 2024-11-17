@@ -7,24 +7,22 @@ class DFS:
     def solve(self):
         root = self.board
 
+        if not root.solvable():
+            return 'The initial board is unsolvable', 0
+        
         stack = LifoQueue()
         stack.put(root)
         
         explored = set()
         
-        while not(stack.empty()):
+        while not stack.empty():
             curr_state = stack.get()
             
-            explored.add(curr_state)
             
             if curr_state.already_solved():
                 return curr_state.solution(), len(explored)
-            
-            if not curr_state.solvable():
-                continue
-            
-            # if curr_state.depth == 31: 
-            #     continue
+
+            explored.add(curr_state)
             
             child_states = curr_state.move()
             
@@ -32,5 +30,5 @@ class DFS:
                 if c not in explored:
                     stack.put(c)
                     
-        return (("The initial board is unsolvable"), len(explored))
+        return (("No solution was found"), len(explored))
             

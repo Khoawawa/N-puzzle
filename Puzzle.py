@@ -25,16 +25,65 @@ class Puzzle:
     def already_solved(self):
         return self.board == self.goal
     
+    def _count_and_merge(self,arr, l, m, r):
+        n1 = m - l + 1
+        n2 = r - m
+        
+        left = arr[l : m + 1]
+        right = arr[m + 1: r + 1]
+        
+        res = 0
+        i = 0
+        j = 0
+        k = l
+        
+        while i < n1 and j < n2:
+
+        # No increment in inversion count
+        # if left[] has a smaller or equal element
+            if left[i] <= right[j]:
+                arr[k] = left[i]
+                i += 1
+            else:
+                arr[k] = right[j]
+                j += 1
+                res += (n1 - i)
+            k += 1
+
+        # Merge remaining elements
+        while i < n1:
+            arr[k] = left[i]
+            i += 1
+            k += 1
+        while j < n2:
+            arr[k] = right[j]
+            j += 1
+            k += 1
+
+        return res
+            
+    def _count_inv(self,arr,l,r):
+        res = 0
+        if l < r:
+            m = (r + l) // 2
+
+            res += self._count_inv(arr,l,m)
+            res += self._count_inv(arr, m + 1, r)
+            
+            res += self._count_and_merge(arr, l, m, r)
+        return res
+    
     def inv_num(self):
         flat_board = [num for row in self.board for num in row if num != 0]
-        inv = 0
-        for i in range(len(flat_board)-1):
-            for j in range(i+1 , len(flat_board)):
-                if ((flat_board[i] > flat_board[j]) and flat_board[i] and flat_board[j]):
-                    inv += 1   
-        # inv = sum(1 for i in range(len(flat_board) - 1) for j in range(i+1,len(flat_board)) if flat_board[i] > flat_board[j] and flat_board[i] and flat_board[j]) 
+        return self._count_inv(flat_board,0, len(flat_board) - 1)
+        # inv = 0
+        # for i in range(len(flat_board)-1):
+        #     for j in range(i+1 , len(flat_board)):
+        #         if ((flat_board[i] > flat_board[j]) and flat_board[i] and flat_board[j]):
+        #             inv += 1   
+        # # inv = sum(1 for i in range(len(flat_board) - 1) for j in range(i+1,len(flat_board)) if flat_board[i] > flat_board[j] and flat_board[i] and flat_board[j]) 
         
-        return inv
+        # return inv
     
     def blank_row_from_bottom(self):
         for i, row in enumerate(reversed(self.board)):
@@ -71,7 +120,7 @@ class Puzzle:
         return None
     
     def legal_moves(self,row,col):
-        moves = ['L','R','U','D']
+        moves = ['L','R','D','U']
         if col == 0:
             moves.remove('L')
         if col == self.k - 1:
@@ -97,18 +146,19 @@ class Puzzle:
         new_board = None
         
         for direction in moves:
+            new_row = x_row
+            new_col = x_col
+            
             if direction == 'U':
                 new_row = x_row - 1
-                new_board = self._swap_cell(x_row,x_col,new_row,x_col)
             elif direction == 'D':
                 new_row = x_row + 1
-                new_board = self._swap_cell(x_row,x_col,new_row,x_col)
             elif direction == 'R':
                 new_col = x_col + 1
-                new_board = self._swap_cell(x_row,x_col,x_row,new_col)
             elif direction == 'L':
                 new_col = x_col - 1
-                new_board = self._swap_cell(x_row,x_col,x_row,new_col)
+                
+            new_board = self._swap_cell(x_row,x_col,new_row,new_col)
             
             children.append(Puzzle(new_board,self.k,direction,self.depth + 1,self))
         
